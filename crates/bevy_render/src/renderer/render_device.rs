@@ -7,7 +7,7 @@ use crate::WgpuWrapper;
 use bevy_ecs::resource::Resource;
 use wgpu::{
     util::DeviceExt, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
-    BindGroupLayoutEntry, BufferAsyncError, BufferBindingType, MaintainResult,
+    BindGroupLayoutEntry, BufferAsyncError, BufferBindingType, PollStatus,
 };
 
 /// This GPU device is responsible for the creation of most rendering and compute resources.
@@ -118,7 +118,7 @@ impl RenderDevice {
     ///
     /// no-op on the web, device is automatically polled.
     #[inline]
-    pub fn poll(&self, maintain: wgpu::Maintain) -> MaintainResult {
+    pub fn poll(&self, maintain: wgpu::PollType) -> Result<PollStatus, wgpu::PollError> {
         self.device.poll(maintain)
     }
 

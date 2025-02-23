@@ -4200,3 +4200,7 @@ name = "Occlusion Culling"
 description = "Demonstration of Occlusion Culling"
 category = "3D Rendering"
 wasm = false
+
+[patch.crates-io]
+wgpu = { path = "../wgpu/wgpu" }
+wgpu-types = { path = "../wgpu/wgpu-types" }

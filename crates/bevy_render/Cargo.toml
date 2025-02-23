@@ -77,6 +77,8 @@ wgpu = { version = "24", default-features = false, features = [
   "wgsl",
   "dx12",
   "metal",
+  "vulkan",
+  "gles",
   "naga-ir",
   "fragile-send-sync-non-atomic-wasm",
 ] }

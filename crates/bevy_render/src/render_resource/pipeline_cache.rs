@@ -299,14 +299,28 @@ impl ShaderCache {
                             })
                             .collect::<std::collections::HashMap<_, _>>();
 
-                        let naga = self.composer.make_naga_module(
+                        let module = self.composer.make_naga_module(
                             naga_oil::compose::NagaModuleDescriptor {
                                 shader_defs,
                                 ..shader.into()
                             },
                         )?;
 
-                        ShaderSource::Naga(Cow::Owned(naga))
+                        let info = naga::valid::Validator::new(
+                            naga::valid::ValidationFlags::all(),
+                            Capabilities::all(),
+                        )
+                        .validate(&module)
+                        .unwrap();
+
+                        let wgsl = naga::back::wgsl::write_string(
+                            &module,
+                            &info,
+                            naga::back::wgsl::WriterFlags::all(),
+                        )
+                        .unwrap();
+
+                        ShaderSource::Wgsl(Cow::Owned(wgsl))
                     }
                 };
 
@@ -743,7 +757,7 @@ impl PipelineCache {
 
                 // TODO: Expose the rest of this somehow
                 let compilation_options = PipelineCompilationOptions {
-                    constants: &default(),
+                    constants: &[],
                     zero_initialize_workgroup_memory: descriptor.zero_initialize_workgroup_memory,
                 };
 
@@ -825,7 +839,7 @@ impl PipelineCache {
                     entry_point: Some(&descriptor.entry_point),
                     // TODO: Expose the rest of this somehow
                     compilation_options: PipelineCompilationOptions {
-                        constants: &default(),
+                        constants: &[],
                         zero_initialize_workgroup_memory: descriptor
                             .zero_initialize_workgroup_memory,
                     },
@@ -1024,7 +1038,7 @@ fn get_capabilities(features: Features, downlevel: DownlevelFlags) -> Capabiliti
     );
     capabilities.set(
         Capabilities::UNIFORM_BUFFER_AND_STORAGE_TEXTURE_ARRAY_NON_UNIFORM_INDEXING,
-        features.contains(Features::UNIFORM_BUFFER_AND_STORAGE_TEXTURE_ARRAY_NON_UNIFORM_INDEXING),
+        features.contains(Features::STORAGE_TEXTURE_ARRAY_NON_UNIFORM_INDEXING),
     );
     // TODO: This needs a proper wgpu feature
     capabilities.set(
